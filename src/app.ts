@@ -7,11 +7,13 @@ import { ErrorHandler } from './middlewares/errorHandler';
 import connectDB from './database/connection';
 import { Logger } from './utils/customLogger.util';
 import config from './config/index';
+import { loadRoutes } from './routes';
 
 dotenv.config();
 
 const app: Application = express();
 const port = config.port;
+const API_PREFIX = '/api/v1';
 
 app.use(cors());
 app.use(helmet());
@@ -26,6 +28,8 @@ app.get('/', (_req: Request, res: Response) => {
     }
   });
 });
+
+app.use(API_PREFIX, loadRoutes(app));
 
 app.use(ErrorHandler.notFoundHandler);
 app.use(ErrorHandler.handleError);

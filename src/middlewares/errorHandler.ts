@@ -4,27 +4,19 @@ export interface IError extends Error {
   status?: number;
 }
 export class ErrorHandler {
-  public static notFoundHandler(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) {
+  public static notFoundHandler(req: Request, res: Response, next: NextFunction) {
     res.status(404);
-    const error = new Error(`🔍 - Not Found - ${req.originalUrl}`);
+    const error: IError = new Error(`🔍 - Not Found - ${req.originalUrl}`);
+    error.status = 404;
     next(error);
   }
 
-  public static handleError(
-    error: IError,
-    req: Request,
-    res: Response,
-    _next: NextFunction
-  ) {
+  public static handleError(error: IError, req: Request, res: Response, _next: NextFunction) {
     const statusCode = error.status || 500;
     res.status(statusCode);
     res.json({
       success: false,
-      message: error.message,
+      message: error.message
     });
   }
 }
