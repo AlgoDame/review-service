@@ -1,6 +1,10 @@
 class ErrorObject extends Error {
+  status: number;
+
   constructor(name: string, statusCode: number) {
     super();
+    this.name = name;
+    this.status = statusCode;
   }
 }
 

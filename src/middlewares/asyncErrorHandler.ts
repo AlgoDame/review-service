@@ -1,11 +1,12 @@
 import { RequestHandler, Request, Response, NextFunction } from 'express';
+import { Logger } from '../utils/customLogger.util';
 
-export default function (handler: RequestHandler) {
+export default function catchAsyncErrors(handler: RequestHandler) {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      handler(req, res, next);
+      await handler(req, res, next);
     } catch (ex) {
-      console.log(ex);
+      Logger.error('error ~ ', ex);
       next(ex);
     }
   };

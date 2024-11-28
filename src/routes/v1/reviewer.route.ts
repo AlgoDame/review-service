@@ -7,5 +7,9 @@ const router = Router();
 const reviewerController = new ReviewerController();
 
 router.post('/register', catchAsyncErrors(reviewerController.createReviewer));
+router.put('/:reviewerId/update', catchAsyncErrors(reviewerController.updateReviewer));
+router.delete('/:reviewerId/delete', catchAsyncErrors(reviewerController.deleteReviewer));
+router.get('/:reviewerId/details', catchAsyncErrors(reviewerController.getReviewer));
+router.get('/list', catchAsyncErrors(reviewerController.getAllReviewers));
 
 export default router;

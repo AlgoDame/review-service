@@ -35,6 +35,16 @@ export interface CreateReviewerDto {
   languages: Language[];
 }
 
+export interface UpdateReviewerDto {
+  firstName?: string;
+  lastName?: string;
+  bio?: string;
+  profileImage?: string;
+  preferredGenres?: IGenre[];
+  primaryLanguage?: Language;
+  languages?: Language[];
+}
+
 export interface IReviewer extends Document {
   firstName: string;
   lastName: string;
@@ -42,7 +52,7 @@ export interface IReviewer extends Document {
   password: string;
   bio: string;
   profileImage?: string;
-  isVerified: boolean;
+  status: 'active' | 'inactive';
   verifiedAt: Date;
   preferredGenres: IGenre[];
   primaryLanguage: Language;
@@ -57,10 +67,10 @@ const reviewerSchema = new Schema<IReviewer>(
     firstName: { type: String, required: true, trim: true },
     lastName: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true },
-    password: { type: String, required: true },
+    password: { type: String, required: true, select: false },
     bio: { type: String },
     profileImage: String,
-    isVerified: { type: Boolean, default: false },
+    status: { type: String, default: 'active' },
     verifiedAt: Date,
     preferredGenres: {
       type: [String],
@@ -80,7 +90,13 @@ const reviewerSchema = new Schema<IReviewer>(
     isDeleted: { type: Boolean, default: false }
   },
   {
-    timestamps: true
+    timestamps: true,
+    toJSON: {
+      transform: function (doc, ret) {
+        delete ret.password;
+        return ret;
+      }
+    }
   }
 );
 
