@@ -95,6 +95,26 @@ class ReviewerController {
       message
     });
   };
+
+  getTopPrimaryLanguages: RequestHandler = async (req, res) => {
+    const topLanguages = await reviewerService.getTopPrimaryLanguages();
+    return sendResponse({
+      res,
+      statusCode: 200,
+      data: topLanguages,
+      message: 'Top primary languages fetched successfully'
+    });
+  };
+
+  getTopPreferredGenres: RequestHandler = async (req, res) => {
+    const topGenres = await reviewerService.getTopPreferredGenres();
+    return sendResponse({
+      res,
+      statusCode: 200,
+      data: topGenres,
+      message: 'Top preferred genres fetched successfully'
+    });
+  };
 }
 
 export default ReviewerController;

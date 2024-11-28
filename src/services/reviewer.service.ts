@@ -4,6 +4,7 @@ import { CreateReviewerDto, UpdateReviewerDto } from '../models/reviewers.model'
 import Reviewer from '../models/reviewers.model';
 import { DuplicateResourceError, NotFoundError } from '../utils/customError.util';
 import { PaginationOptions, QueryParams } from '../@types';
+import { PipelineStage } from 'mongoose';
 
 class ReviewerService {
   async createReviewer(data: CreateReviewerDto) {
@@ -92,7 +93,10 @@ class ReviewerService {
     }
 
     if (filter.startDate && filter.endDate) {
-      query.createdAt = { $gte: moment(filter.startDate).toDate(), $lte: moment(filter.endDate).toDate() };
+      query.createdAt = {
+        $gte: moment(filter.startDate).toDate(),
+        $lte: moment(filter.endDate).toDate()
+      };
     }
 
     if (filter.status) {
@@ -118,6 +122,87 @@ class ReviewerService {
     const total = await Reviewer.countDocuments(query);
 
     return { reviewers, total };
+  }
+
+  async getTopPrimaryLanguages() {
+    const topLanguagesPipeline: PipelineStage[] = [
+      // Step 1: Filter out deleted reviewers
+      {
+        $match: { isDeleted: { $ne: true } }
+      },
+      // Step 2: Group by primaryLanguage and count the reviewers
+      {
+        $group: {
+          _id: '$primaryLanguage',
+          count: { $sum: 1 }
+        }
+      },
+      // Step 3: Sort by count in descending order
+      {
+        $sort: { count: -1 }
+      },
+      // Step 4: Limit to top 2 results
+      {
+        $limit: 2
+      },
+      // Step 5: Format the output
+      {
+        $project: {
+          primaryLanguage: '$_id',
+          count: 1,
+          _id: 0
+        }
+      }
+    ];
+
+    const topLanguages = await Reviewer.aggregate(topLanguagesPipeline);
+
+    return { topLanguages };
+  }
+
+  async getTopPreferredGenres() {
+    const topPreferredGenresPipeline: PipelineStage[] = [
+      // Step 1: Filter out deleted reviewers
+      {
+        $match: {
+          isDeleted: false
+        }
+      },
+      // Step 2: Unwind the preferredGenres array
+      {
+        $unwind: '$preferredGenres'
+      },
+      // Step 3: Group by genre and count occurrences
+      {
+        $group: {
+          _id: '$preferredGenres',
+          count: {
+            $sum: 1
+          }
+        }
+      },
+      // Step 4: Sort by count in descending order
+      {
+        $sort: {
+          count: -1
+        }
+      },
+      // Step 5: Limit to top 3 results
+      {
+        $limit: 3
+      },
+      // Step 6: Format the output
+      {
+        $project: {
+          genre: '$_id',
+          count: 1,
+          _id: 0
+        }
+      }
+    ];
+    const topPreferredGenres = await Reviewer.aggregate(topPreferredGenresPipeline);
+
+    return { topPreferredGenres };
   }
 }
 
